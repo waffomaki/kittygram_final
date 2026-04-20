@@ -3,7 +3,7 @@ version: '3'
 volumes:
   pg_data:
   static:
-  media:
+  media:  # Загруженные пользователями картинки
 
 services:
   db:
@@ -11,26 +11,30 @@ services:
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+
   backend:
     build: ./backend/
     env_file: .env
     volumes:
-      - media:/app/media
+      - media:/app/media # Сохраняем загрузки пользователей
     depends_on:
-      - db
+      - db # Ждем запуска БД
+
   frontend:
     env_file: .env
     build: ./frontend/
+    # Собираем проект, копируем готовые файлы в том 'static'
     command: cp -r /app/build/. /static/
     volumes:
       - static:/static
+
   gateway:
     build: ./nginx/
     env_file: .env
     ports:
-      - 9000:80
+      - 9000:80 # Основной порт доступа к приложению
     volumes:
-      - static:/static
-      - media:/app/media
+      - static:/static # Раздаем фронтенд
+      - media:/app/media # Раздаем медиа
     depends_on:
-      - backend
+      - backend # Ждем запуска API

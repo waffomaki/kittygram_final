@@ -2,8 +2,8 @@ version: '3'
 
 volumes:
   pg_data:
-  static:
-  media:
+  static: # Файлы фронта
+  media: # Пользовательские файлы
 
 services:
   db:
@@ -11,25 +11,31 @@ services:
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+
   backend:
+    # Берем готовый образ с Docker Hub
     image: waffomaki/kittygram_backend:latest
     env_file: .env
     volumes:
       - media:/app/media
     depends_on:
       - db
+
   frontend:
+    # Берем готовый образ фронта
     image: waffomaki/kittygram_frontend:latest
     env_file: .env
     volumes:
       - static:/static
+
   gateway:
+    # Берем Nginx
     image: waffomaki/kittygram_gateway:latest
     env_file: .env
     ports:
-      - 9000:80
+      - 9000:80  # Доступ к сайту через порт 9000
     volumes:
-      - static:/static
-      - media:/app/media
+      - static:/static  # Nginx раздает статику из этого тома
+      - media:/app/media # Nginx раздает медиа из этого тома
     depends_on:
       - backend
